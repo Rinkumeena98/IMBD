@@ -3,9 +3,17 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 import streamlit as st
+import os
 
-# Load the dataset
-df = pd.read_csv("IMDB-Movie-Data .csv")
+# Check the current working directory to debug file path
+st.write("Current Working Directory:", os.getcwd())
+
+# Load the dataset (fix any potential issues with the file name or path)
+try:
+    df = pd.read_csv("IMDB-Movie-Data.csv")
+except FileNotFoundError:
+    st.error("File not found. Please check if the file IMDB-Movie-Data.csv is in the correct directory.")
+    st.stop()
 
 # Display the first few rows of the dataframe
 st.write("First few rows of the dataset:", df.head())
@@ -23,6 +31,8 @@ st.write(missing_values)
 st.write("Heatmap of missing values:")
 plt.figure(figsize=(10, 7))
 sns.heatmap(df.isnull(), cbar=False, cmap='viridis')
+plt.title("Heatmap of Missing Values")
+plt.tight_layout()
 st.pyplot()
 
 # Display the percentage of missing values
@@ -30,7 +40,12 @@ st.write("Percentage of Missing Values:")
 per_missing = df.isnull().sum() * 100 / len(df)
 st.write(per_missing)
 
-# Drop rows with missing values
+# Handle missing data - Optional: Fill missing numeric values with the column mean
+df_filled = df.fillna(df.mean(numeric_only=True))  # Fills missing numeric values with column mean
+# For categorical columns, you can fill with the mode:
+# df['column_name'] = df['column_name'].fillna(df['column_name'].mode()[0])
+
+# Drop rows with missing values (Optional: You can choose to drop or fill missing values)
 df_cleaned = df.dropna(axis=0)
 st.write("Data after dropping missing values:", df_cleaned.shape)
 
@@ -57,6 +72,7 @@ st.write("Average Votes by Year:")
 plt.figure(figsize=(10, 6))
 sns.barplot(x='Year', y='Votes', data=df)
 plt.title("Average votes by Year")
+plt.tight_layout()
 st.pyplot()
 
 # Find the year with the highest average revenue
@@ -69,6 +85,7 @@ st.write("Average Revenue by Year:")
 plt.figure(figsize=(10, 6))
 sns.barplot(x='Year', y='Revenue (Millions)', data=df)
 plt.title("Average Revenue by Year")
+plt.tight_layout()
 st.pyplot()
 
 # Display top 10 directors with highest average ratings
@@ -86,6 +103,7 @@ st.write("Top 10 Longest Movies:")
 plt.figure(figsize=(10, 6))
 sns.barplot(x='Runtime (Minutes)', y=top10.index, data=top10)
 plt.title("Top 10 Longest Movies")
+plt.tight_layout()
 st.pyplot()
 
 # Display number of movies per year
@@ -98,6 +116,7 @@ st.write("Number of Movies per Year (Countplot):")
 plt.figure(figsize=(10, 6))
 sns.countplot(x='Year', data=df)
 plt.title("Number of Movies per Year")
+plt.tight_layout()
 st.pyplot()
 
 # Display the title of the most popular movie (highest revenue)
